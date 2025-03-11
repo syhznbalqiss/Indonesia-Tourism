@@ -69,10 +69,16 @@ print("Most popular tourism in Yogyakarta\n", cat_counts)
 
 #combine tables
 result = pd.merge(data1, data2, how='outer', on='Place_Id')
+print(result)
 
-#frequency of places visited 
-visit_frequency = result['Place_Name'].value_counts()
+visit_counts = result['Place_Name'].value_counts().reset_index()
+visit_counts.columns = ['Place_Name', 'Visit_Count']
+
+# Merge to get Place_ID
+visit_freq = result[['Place_Id', 'Place_Name']].drop_duplicates().merge(visit_counts, on='Place_Name')
+
 #most
-print("Place with the most visits\n", visit_frequency.head())
+print("Place with the most visits\n", visit_freq.nlargest(5, 'Visit_Count'))
 #least
-print("Place with the least visits\n", visit_frequency.tail())
+print("Place with the least visits\n", visit_freq.nsmallest(5, 'Visit_Count'))
+
