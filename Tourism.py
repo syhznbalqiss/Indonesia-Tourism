@@ -95,7 +95,8 @@ print("City with the most tourism\n", city_tourism)
 #most popular tourism in Yogyakarta
 city_tourism_cat = data1[data1['City'] == 'Yogyakarta']
 cat_counts = city_tourism_cat['Category'].value_counts()
-print("Most popular tourism in Yogyakarta\n", cat_counts)
+cat_price = city_tourism_cat.groupby('Category')['Price'].mean().reset_index()
+print("Most popular tourism in Yogyakarta\n", cat_counts, cat_price)
 
 #combine tables
 data1n2 = pd.merge(data1, data2, how='outer', on='Place_Id')
@@ -104,8 +105,8 @@ print(data1n2)
 #counts visit per category
 visit_counts = data1n2['Place_Name'].value_counts().reset_index()
 visit_counts.columns = ['Place_Name', 'Visit_Count']
-# Merge to get Place_ID
-visit_freq = data1n2[['Place_Id', 'Place_Name']].drop_duplicates().merge(visit_counts, on='Place_Name')
+#Merge to get Place_ID
+visit_freq = data1n2[['Place_Id', 'Place_Name', 'Price']].drop_duplicates().merge(visit_counts, on='Place_Name')
 #most
 print("Place with the most visits\n", visit_freq.nlargest(5, 'Visit_Count'))
 #least
@@ -141,8 +142,8 @@ print(filtered_places[['User_Id', 'Category']])
 print("Top category for the middle gen: ", filtered_places[['Category']].mode())
 
 #City preferences for older generation (age >= 35)
-spec_user_old = data3[data3['Age'] >= 35]
-filtered_places_old = alldata[alldata['User_Id'].isin(spec_user_old['User_Id'])]
+spec_user_old = data3[data3['Age'] >= 35] 
+filtered_places_old = alldata[(alldata['User_Id'].isin(spec_user_old['User_Id']))]
 print("Older Generation Users and Cities:\n", filtered_places_old[['User_Id', 'City']])
 print("City older gen prefer: ", filtered_places_old[['City']].mode())
 # City preferences for younger generation (age < 25)
@@ -155,5 +156,3 @@ spec_user_mid = data3[(data3['Age'] > 25) & (data3['Age'] <= 40)]
 filtered_places_mid = alldata[alldata['User_Id'].isin(spec_user_mid['User_Id'])]
 print("Middle Generation Users and Cities:\n", filtered_places_mid[['User_Id', 'City']])
 print("City middle gen prefer: ", filtered_places_mid[['City']].mode())
-
-
