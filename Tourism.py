@@ -74,7 +74,7 @@ print("Total users: ", data3.User_Id.count())
 
 #checking data type
 print(data3.dtypes)
-'''
+
 #DATA MANIPULATION 
 #sorting highest ratings
 sorted_data1 = data1.sort_values(by='Rating', ascending=False)
@@ -125,22 +125,35 @@ print("Youngest user: ", youngest)
 alldata = pd.merge(data3, data1n2, how='outer', on='User_Id')
 
 #common category for the older
-spec_user = data3[data3['Age'] >=35]
-filtered_places = alldata[alldata['User_Id'].isin(spec_user['User_Id'])]
+spec_user_old = data3[data3['Age'] >=35]
+filtered_places = alldata[alldata['User_Id'].isin(spec_user_old['User_Id'])]
 print(filtered_places[['User_Id', 'Category']])
 print("Top category for the older gen: ", filtered_places[['Category']].mode())
 #common category for the younger
-spec_user = data3[data3['Age'] <25]
-filtered_places = alldata[alldata['User_Id'].isin(spec_user['User_Id'])]
+spec_user_young = data3[data3['Age'] <25]
+filtered_places = alldata[alldata['User_Id'].isin(spec_user_young['User_Id'])]
 print(filtered_places[['User_Id', 'Category']])
 print("Top category for the younger gen: ", filtered_places[['Category']].mode())
 #common category for the mid
-spec_user = data3[(data3['Age'] >25) & (data3['Age'] <=40)]
-filtered_places = alldata[alldata['User_Id'].isin(spec_user['User_Id'])]
+spec_user_mid = data3[(data3['Age'] >25) & (data3['Age'] <=40)]
+filtered_places = alldata[alldata['User_Id'].isin(spec_user_mid['User_Id'])]
 print(filtered_places[['User_Id', 'Category']])
 print("Top category for the middle gen: ", filtered_places[['Category']].mode())
-'''
 
-print(data1.describe())
-print(data2.describe())
-print(data3.describe())
+#City preferences for older generation (age >= 35)
+spec_user_old = data3[data3['Age'] >= 35]
+filtered_places_old = alldata[alldata['User_Id'].isin(spec_user_old['User_Id'])]
+print("Older Generation Users and Cities:\n", filtered_places_old[['User_Id', 'City']])
+print("City older gen prefer: ", filtered_places_old[['City']].mode())
+# City preferences for younger generation (age < 25)
+spec_user_young = data3[data3['Age'] < 25]
+filtered_places_young = alldata[alldata['User_Id'].isin(spec_user_young['User_Id'])]
+print("Younger Generation Users and Cities:\n", filtered_places_young[['User_Id', 'City']])
+print("City younger gen prefer: ", filtered_places_young[['City']].mode())
+# City preferences for middle generation (age between 25 and 40)
+spec_user_mid = data3[(data3['Age'] > 25) & (data3['Age'] <= 40)]
+filtered_places_mid = alldata[alldata['User_Id'].isin(spec_user_mid['User_Id'])]
+print("Middle Generation Users and Cities:\n", filtered_places_mid[['User_Id', 'City']])
+print("City middle gen prefer: ", filtered_places_mid[['City']].mode())
+
+
