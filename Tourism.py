@@ -77,44 +77,47 @@ print(data3.dtypes)
 
 #DATA MANIPULATION 
 #sorting highest ratings
-sorted_data1 = data1.sort_values(by='Rating', ascending=False)
-print(sorted_data1.head())
+highestRate_data1 = data1.sort_values(by='Rating', ascending=False)
+print(highestRate_data1.head())
 
 #sorting lowest ratings
-sorted_data1 = data1.sort_values(by='Rating', ascending=True)
-print(sorted_data1.head())
+leastRate_data1 = data1.sort_values(by='Rating', ascending=True)
+print(leastRate_data1.head())
 
 #most category
 most_category = data1['Category'].value_counts()
-print("Most category\n", most_category.head())
+print("\nMost category:\n", most_category.head())
 
 #cities with the most tourism place
 city_tourism = data1['City'].value_counts()
-print("City with the most tourism\n", city_tourism)
+print("\nCity with the most tourism:\n", city_tourism)
 
 #most popular tourism in Yogyakarta
 city_tourism_cat = data1[data1['City'] == 'Yogyakarta']
 cat_counts = city_tourism_cat['Category'].value_counts()
 cat_price = city_tourism_cat.groupby('Category')['Price'].mean().reset_index()
-print("Most popular tourism in Yogyakarta\n", cat_counts, cat_price)
+yogya_tourism = pd.merge(cat_counts, cat_price, how='outer', on='Category')
+print("\nMost popular tourism in Yogyakarta\n", yogya_tourism)
 
 #combine tables
 data1n2 = pd.merge(data1, data2, how='outer', on='Place_Id')
-print(data1n2)
+#print(data1n2)
 
 #counts visit per category
 visit_counts = data1n2['Place_Name'].value_counts().reset_index()
 visit_counts.columns = ['Place_Name', 'Visit_Count']
 #Merge to get Place_ID
 visit_freq = data1n2[['Place_Id', 'Place_Name', 'Price']].drop_duplicates().merge(visit_counts, on='Place_Name')
+most_visit = visit_freq.nlargest(5, 'Visit_Count')
+least_visit = visit_freq.nsmallest(5, 'Visit_Count')
 #most
-print("Place with the most visits\n", visit_freq.nlargest(5, 'Visit_Count'))
+print("\nPlace with the most visits\n", most_visit)
 #least
-print("Place with the least visits\n", visit_freq.nsmallest(5, 'Visit_Count'))
+print("Place with the least visits\n", least_visit)
 
 #average age
 age_avg = data3.Age.mean()
-print("Average age: ", age_avg)
+print("\nAverage age: ", age_avg)
 #oldest
 oldest = data3.Age.max()
 print("Oldest user: ", oldest)
@@ -127,32 +130,48 @@ alldata = pd.merge(data3, data1n2, how='outer', on='User_Id')
 
 #common category for the older
 spec_user_old = data3[data3['Age'] >=35]
-filtered_places = alldata[alldata['User_Id'].isin(spec_user_old['User_Id'])]
-print(filtered_places[['User_Id', 'Category']])
-print("Top category for the older gen: ", filtered_places[['Category']].mode())
+category_old = alldata[alldata['User_Id'].isin(spec_user_old['User_Id'])]
+#print(category_old[['User_Id', 'Category']])
+print("\nTop category for the older gen: ", category_old[['Category']].mode())
 #common category for the younger
 spec_user_young = data3[data3['Age'] <25]
-filtered_places = alldata[alldata['User_Id'].isin(spec_user_young['User_Id'])]
-print(filtered_places[['User_Id', 'Category']])
-print("Top category for the younger gen: ", filtered_places[['Category']].mode())
+category_young = alldata[alldata['User_Id'].isin(spec_user_young['User_Id'])]
+#print(category_young[['User_Id', 'Category']])
+print("Top category for the younger gen: ", category_young[['Category']].mode())
 #common category for the mid
 spec_user_mid = data3[(data3['Age'] >25) & (data3['Age'] <=40)]
-filtered_places = alldata[alldata['User_Id'].isin(spec_user_mid['User_Id'])]
-print(filtered_places[['User_Id', 'Category']])
-print("Top category for the middle gen: ", filtered_places[['Category']].mode())
+category_mid = alldata[alldata['User_Id'].isin(spec_user_mid['User_Id'])]
+#print(category_mid[['User_Id', 'Category']])
+print("Top category for the middle gen: ", category_mid[['Category']].mode())
 
 #City preferences for older generation (age >= 35)
 spec_user_old = data3[data3['Age'] >= 35] 
 filtered_places_old = alldata[(alldata['User_Id'].isin(spec_user_old['User_Id']))]
-print("Older Generation Users and Cities:\n", filtered_places_old[['User_Id', 'City']])
-print("City older gen prefer: ", filtered_places_old[['City']].mode())
+#print("Older Generation Users and Cities:\n", filtered_places_old[['User_Id', 'City']])
+print("\nCity older gen prefer: ", filtered_places_old[['City']].mode())
 # City preferences for younger generation (age < 25)
 spec_user_young = data3[data3['Age'] < 25]
 filtered_places_young = alldata[alldata['User_Id'].isin(spec_user_young['User_Id'])]
-print("Younger Generation Users and Cities:\n", filtered_places_young[['User_Id', 'City']])
+#print("Younger Generation Users and Cities:\n", filtered_places_young[['User_Id', 'City']])
 print("City younger gen prefer: ", filtered_places_young[['City']].mode())
 # City preferences for middle generation (age between 25 and 40)
 spec_user_mid = data3[(data3['Age'] > 25) & (data3['Age'] <= 40)]
 filtered_places_mid = alldata[alldata['User_Id'].isin(spec_user_mid['User_Id'])]
-print("Middle Generation Users and Cities:\n", filtered_places_mid[['User_Id', 'City']])
+#print("Middle Generation Users and Cities:\n", filtered_places_mid[['User_Id', 'City']])
 print("City middle gen prefer: ", filtered_places_mid[['City']].mode())
+
+#export to a single excel file with multiple sheets
+with pd.ExcelWriter('combined data.xlsx', engine='openpyxl') as writer:
+    highestRate_data1.to_excel(writer, sheet_name='Highest Rating', index=False)
+
+    leastRate_data1.to_excel(writer, sheet_name='Lowest Rating', index=False)
+
+    most_category.to_excel(writer, sheet_name='Most Category', index=False)
+
+    yogya_tourism.to_excel(writer, sheet_name='Yogya Tourism', index=False)
+
+    most_visit.to_excel(writer, sheet_name='Most Visit Places', index=False)
+
+    least_visit.to_excel(writer, sheet_name='Least Visit Places', index=False)
+
+print('Data succesfully exported to combined data.xlsx')
